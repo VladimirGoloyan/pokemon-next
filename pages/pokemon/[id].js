@@ -1,14 +1,12 @@
-/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import Head from "next/head";
-import Link from "next/link";
 import styles from "../../styles/Details.module.css";
+import {baseUrls, formatString, getAllPokemon, getOnePokemon} from "../../utils/utils";
+import locale from "../../utils/locale";
+import {Box, Container, Link, Table, TableBody, TableCell, TableHead, TableRow, Typography} from "@mui/material";
 
 export async function getStaticPaths() {
-  const resp = await fetch(
-    "https://jherr-pokemon.s3.us-west-1.amazonaws.com/index.json"
-  );
-  const pokemon = await resp.json();
+  const pokemon = await getAllPokemon();
 
   return {
     paths: pokemon.map((pokemon) => ({
@@ -19,13 +17,11 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const resp = await fetch(
-    `https://jherr-pokemon.s3.us-west-1.amazonaws.com/pokemon/${params.id}.json`
-  );
+  const pokemonInfo = await getOnePokemon(params.id);
 
   return {
     props: {
-      pokemon: await resp.json(),
+      pokemon: pokemonInfo,
     },
     // revalidate: 30,
   };
@@ -33,44 +29,42 @@ export async function getStaticProps({ params }) {
 
 export default function Details({ pokemon }) {
   return (
-    <div>
+    <Container>
       <Head>
         <title>{pokemon.name}</title>
       </Head>
-      <div>
-        <Link href="/">
-          <a>Back to Home</a>
+      <Box>
+        <Link underline="none" color='inherit' href="/">
+          {locale.backText}
         </Link>
-      </div>
-      <div className={styles.layout}>
-        <div>
+      </Box>
+      <Box className={styles.layout}>
           <img
             className={styles.picture}
-            src={`https://jherr-pokemon.s3.us-west-1.amazonaws.com/${pokemon.image}`}
+            src={formatString(baseUrls.pokemonImage, pokemon.image)}
             alt={pokemon.name.english}
           />
-        </div>
-        <div>
-          <div className={styles.name}>{pokemon.name}</div>
-          <div className={styles.type}>{pokemon.type.join(", ")}</div>
-          <table>
-            <thead className={styles.header}>
-              <tr>
-                <th>Name</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
+        <Box>
+          <Typography className={styles.name}>{pokemon.name}</Typography>
+          <Typography className={styles.type}>{pokemon.type.join(", ")}</Typography>
+          <Table>
+            <TableHead className={styles.header}>
+              <TableRow>
+                <TableCell>{locale.name}</TableCell>
+                <TableCell>{locale.value}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {pokemon.stats.map(({ name, value }) => (
-                <tr key={name}>
-                  <td className={styles.attribute}>{name}</td>
-                  <td>{value}</td>
-                </tr>
+                <TableRow key={name}>
+                  <TableCell className={styles.attribute}>{name}</TableCell>
+                  <TableCell>{value}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+            </TableBody>
+          </Table>
+        </Box>
+      </Box>
+    </Container>
   );
 }

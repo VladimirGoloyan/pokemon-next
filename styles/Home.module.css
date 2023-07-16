@@ -1,9 +1,17 @@
 .grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 10px;
+}
+
+.card {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    min-width: 300px;
 }
 
 .card img {
-  max-height: 200px;
+    max-height: 225px;
 }
+

@@ -1,43 +1,56 @@
-/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import Head from "next/head";
-import Link from "next/link";
 import styles from "../styles/Home.module.css";
+import {Box, Card, Container, Grid, Link, Typography} from "@mui/material";
+import locale from "../utils/locale";
+import {baseUrls, formatString, getAllPokemon} from "../utils/utils";
 
-export async function getStaticProps() {
-  const resp = await fetch(
-    "https://jherr-pokemon.s3.us-west-1.amazonaws.com/index.json"
-  );
-
-  return {
-    props: {
-      pokemon: await resp.json(),
+const sxClasses = {
+    card: {
+        p: 2,
     },
-  };
+    link: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column'
+    }
 }
 
-export default function Home({ pokemon }) {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Pokemon List</title>
-      </Head>
-      <h2>Pokemon List</h2>
-      <div className={styles.grid}>
-        {pokemon.map((pokemon) => (
-          <div className={styles.card} key={pokemon.id}>
-            <Link href={`/pokemon/${pokemon.id}`}>
-              <a>
-                <img
-                  src={`https://jherr-pokemon.s3.us-west-1.amazonaws.com/${pokemon.image}`}
-                  alt={pokemon.name}
-                />
-                <h3>{pokemon.name}</h3>
-              </a>
-            </Link>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+export async function getStaticProps() {
+    const resp = await getAllPokemon()
+
+    return {
+        props: {
+            pokemon: resp,
+        },
+    };
+}
+
+export default function Home({pokemon}) {
+    return (
+        <Container className={styles.container}>
+            <Head>
+                <title>{locale.listTitle}</title>
+            </Head>
+            <Typography variant={"h2"}>{locale.listTitle}</Typography>
+            <Grid className={styles.grid}>
+                {pokemon.map((pokemon) => (
+                    <Grid item className={styles.card} key={pokemon.id}>
+                        <Card sx={sxClasses.card}>
+                            <Link color={'inherit'} underline={'none'} href={`/pokemon/${pokemon.id}`}
+                                  sx={sxClasses.link}>
+                                <Typography variant={'h4'}>{pokemon.name}</Typography>
+                                <Box
+                                    component='img'
+                                    src={formatString(baseUrls.pokemonImage, pokemon.image)}
+                                    alt={pokemon.name}
+                                />
+                            </Link>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+        </Container>
+    );
 }
